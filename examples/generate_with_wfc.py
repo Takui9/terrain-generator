@@ -61,6 +61,7 @@ def create_mesh_from_cfg(
     visualize=False,
     enable_history=False,
     enable_sdf=False,
+    enable_stl=False,
     sdf_resolution=0.1,
 ):
     """Generate terrain mesh from config.
@@ -192,6 +193,8 @@ def create_mesh_from_cfg(
 
     print("saving mesh to ", save_dir)
     result_mesh.export(os.path.join(save_dir, "mesh.obj"))
+    if enable_stl:
+        result_mesh.export(os.path.join(save_dir, "mesh.stl"))
     # result_mesh.export(save_dir)
     if overhanging_cfg is not None:
         result_terrain_mesh = result_terrain_mesh.apply_translation(-center)
@@ -200,6 +203,9 @@ def create_mesh_from_cfg(
         result_overhanging_mesh = result_overhanging_mesh.apply_translation(-center)
         result_overhanging_mesh.export(os.path.join(save_dir, "overhanging_mesh.obj"))
         # result_overhanging_mesh.export(save_dir + "_overhanging.obj")
+        if enable_stl:
+            result_terrain_mesh.export(os.path.join(save_dir, "terrain_mesh.stl"))
+            result_overhanging_mesh.export(os.path.join(save_dir, "overhanging_mesh.stl"))
 
     if enable_sdf:
         # sdf_name = save_dir + ".npy"
@@ -211,7 +217,7 @@ def create_mesh_from_cfg(
         if overhanging_cfg is None:
             result_terrain_mesh = result_mesh
         spawnable_locations = calc_spawnable_locations_with_sdf(
-            result_terrain_mesh, sdf_min, height_offset=0.5, sdf_resolution=0.1, sdf_threshold=0.4
+            result_terrain_mesh, sdf_min, height_offset=0.85, sdf_resolution=0.1, sdf_threshold=0.6, visualize=True
         )
         # locations_name = save_dir + "spawnable_locations.npy"
         locations_name = os.path.join(save_dir, "spawnable_locations.npy")
@@ -223,7 +229,8 @@ def create_mesh_from_cfg(
         mesh_terrain = MeshTerrain(mesh_cfg)
         mesh_terrain.save(save_dir)
     if visualize:
-        visualize_mesh(result_mesh)
+        visualize_mesh(result_mesh, save_path=os.path.join(save_dir, "mesh1.png"))
+        # visualize_mesh(result_mesh, save_path=None)
 
 
 if __name__ == "__main__":
@@ -240,6 +247,7 @@ if __name__ == "__main__":
     parser.add_argument("--enable_history", action="store_true", help="Whether to enable mesh history")
     parser.add_argument("--enable_sdf", action="store_true", help="Whether to enable sdf")
     parser.add_argument("--initial_tile_name", type=str, default="floor", help="Whether to enable sdf")
+    parser.add_argument("--enable_stl", action="store_true", help="Whether to generate stl file")
     parser.add_argument(
         "--mesh_dir", type=str, default="results/generated_terrain", help="Directory to save the generated mesh files"
     )
@@ -260,7 +268,7 @@ if __name__ == "__main__":
     else:
         over_cfg = None
 
-    for i in range(10):
+    for i in range(1):
         mesh_prefix = f"{args.mesh_name}_{i}"
         create_mesh_from_cfg(
             cfg,
@@ -271,4 +279,5 @@ if __name__ == "__main__":
             visualize=args.visualize,
             enable_history=args.enable_history,
             enable_sdf=args.enable_sdf,
+            enable_stl=args.enable_stl,
         )

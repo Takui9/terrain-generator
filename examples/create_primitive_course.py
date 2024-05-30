@@ -25,7 +25,7 @@ def generate_tiles(
     cfg,
     mesh_name="result_mesh.stl",
     mesh_dir="results/result",
-    visualize=False,
+    visualize=True,
 ):
 
     dim = cfg.dim
@@ -70,7 +70,7 @@ def generate_tiles(
         name, ext = os.path.splitext(mesh_name)
         floating_mesh.export(os.path.join(mesh_dir, name + "_floating" + ext))
     if visualize:
-        visualize_mesh(result_mesh)
+        visualize_mesh(result_mesh, save_path=os.path.join(mesh_dir, mesh_name.replace(".obj", "") + ".png"))
 
 
 def generate_steps(dim, level, mesh_dir):
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     for level in np.arange(0.0, 1.1, 0.1):
         # generate_steps(dim, level, mesh_dir)
         # generate_gaps(dim, level, mesh_dir)
-        # generate_gaps_with_h(dim, level, mesh_dir)
+        generate_gaps_with_h(dim, level, mesh_dir)
         # generate_middle_steps(dim, level, mesh_dir)
         # generate_middle_steps_wide(dim, level, mesh_dir)
         # generate_narrows(dim, level, mesh_dir)
@@ -293,8 +293,8 @@ if __name__ == "__main__":
         # generate_box_grid(dim, level, mesh_dir)
         # generate_box_grid_slope(dim, level, mesh_dir)
         # generate_box_grid_small(dim, level, mesh_dir)
-        generate_floating_box_grid(dim, level, mesh_dir)
-        generate_floating_box_grid_slope(dim, level, mesh_dir)
-        generate_random_tunnel(dim, level, mesh_dir)
-        generate_random_tunnel_narrow(dim, level, mesh_dir)
-        generate_random_tunnel_slope(dim, level, mesh_dir)
+        # generate_floating_box_grid(dim, level, mesh_dir)
+        # generate_floating_box_grid_slope(dim, level, mesh_dir)
+        # generate_random_tunnel(dim, level, mesh_dir)
+        # generate_random_tunnel_narrow(dim, level, mesh_dir)
+        # generate_random_tunnel_slope(dim, level, mesh_dir)

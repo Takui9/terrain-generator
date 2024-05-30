@@ -17,6 +17,7 @@ import open3d as o3d
 import matplotlib.pyplot as plt
 
 from trimesh.exchange import xyz
+import time
 
 
 def merge_meshes(
@@ -276,9 +277,27 @@ def visualize_mesh(mesh: Union[trimesh.Trimesh, o3d.geometry.TriangleMesh], save
     o3d_mesh.compute_vertex_normals()
     R = o3d.geometry.get_rotation_matrix_from_xyz([-1.0, 0.0, 0.2])
     o3d_mesh.rotate(R, center=[0, 0, 0])
-    o3d.visualization.draw_geometries([o3d_mesh])
-    vis = o3d.visualization.Visualizer()
-    vis.capture_screen_image(save_path)
+    # o3d.visualization.draw_geometries([o3d_mesh])
+    if not save_path is None:
+        o3d.visualization.draw_geometries([o3d_mesh])
+        vis = o3d.visualization.Visualizer()
+        vis.create_window()
+        vis.add_geometry(o3d_mesh)
+        vis.update_geometry(o3d_mesh)
+        vis.poll_events()
+        vis.update_renderer()
+        time.sleep(1)
+        vis.capture_screen_image(save_path, False)
+    else:
+        o3d.visualization.draw_geometries([o3d_mesh])
+        vis = o3d.visualization.Visualizer()
+        vis.create_window()
+        vis.add_geometry(o3d_mesh)
+        vis.update_geometry(o3d_mesh)
+        vis.poll_events()
+        vis.update_renderer()
+        time.sleep(1)
+        vis.capture_screen_image(save_path, False)
 
 
 def compute_signed_distance_and_closest_geometry(scene: o3d.t.geometry.RaycastingScene, query_points: np.ndarray):

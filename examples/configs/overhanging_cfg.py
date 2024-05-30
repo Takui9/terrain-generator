@@ -355,8 +355,8 @@ class OverhangingPattern(MeshPattern):
     ]
     box_dim_mins = [[0.5, 0.5, 0.1], [1.5, 0.05, 0.05]]
     box_dim_maxs = [[1.0, 1.0, 0.5], [1.5, 0.1, 0.1]]
-    min_heights = [0.5, 0.6, 0.7, 1.0]
-    max_heights = [1.0, 1.0, 1.0, 2.0]
+    min_heights = [0.4, 0.6, 0.8, 1.0]
+    max_heights = [0.8, 1.0, 1.2, 2.0]
     roll_pitch_range = [[0.0, np.pi / 6], [0.0, np.pi / 4], [0.0, np.pi / 2]]
     n_boxes = [3, 5]
     floating_box_cfgs = [
