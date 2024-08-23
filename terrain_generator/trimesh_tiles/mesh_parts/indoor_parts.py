@@ -4,6 +4,12 @@
 #
 import trimesh
 import numpy as np
+# from terrain_generator.utils import (
+#     merge_meshes,
+#     yaw_rotate_mesh,
+#     ENGINE,
+#     get_height_array_of_mesh,
+# )
 from ...utils import (
     merge_meshes,
     yaw_rotate_mesh,
@@ -229,6 +235,8 @@ def create_stairs(cfg: StairMeshPartsCfg.Stair):
         mesh.apply_translation([0, cfg.dim[1] / 2.0 - dim[1] / 2.0, 0])
     if "back" in cfg.attach_side:
         mesh.apply_translation([0, -cfg.dim[1] / 2.0 + dim[1] / 2.0, 0])
+    if "center" in cfg.attach_side:
+        mesh.apply_translation([0, 0, 0])
     return mesh
 
 
@@ -323,29 +331,29 @@ if __name__ == "__main__":
     mesh.show()
     print(get_height_array_of_mesh(mesh, stair_wide.dim, 5))
 
-    stair_straight = StairMeshPartsCfg(
-        name="stair_s",
-        rotations=(90, 180, 270),
-        flips=(),
-        weight=0.1,
-        stairs=(
-            StairMeshPartsCfg.Stair(
-                step_width=1.0,
-                # step_height=0.15,
-                step_depth=0.3,
-                total_height=1.0,
-                height_offset=1.0,
-                stair_type="standard",
-                direction="up",
-                add_residual_side_up=True,
-                attach_side="front_right",
-                add_rail=False,
-            ),
-        ),
-    )
-    mesh = create_stairs_mesh(stair_straight)
-    mesh.show()
-    print(get_height_array_of_mesh(mesh, stair_straight.dim, 5))
+    # stair_straight = StairMeshPartsCfg(
+    #     name="stair_s",
+    #     rotations=(90, 180, 270),
+    #     flips=(),
+    #     weight=0.1,
+    #     stairs=(
+    #         StairMeshPartsCfg.Stair(
+    #             step_width=1.0,
+    #             # step_height=0.15,
+    #             step_depth=0.3,
+    #             total_height=1.0,
+    #             height_offset=1.0,
+    #             stair_type="standard",
+    #             direction="up",
+    #             add_residual_side_up=True,
+    #             attach_side="front_right",
+    #             add_rail=False,
+    #         ),
+    #     ),
+    # )
+    # mesh = create_stairs_mesh(stair_straight)
+    # mesh.show()
+    # print(get_height_array_of_mesh(mesh, stair_straight.dim, 5))
     #
     # stair_straight = StairMeshPartsCfg(
     #     name="stair_s",

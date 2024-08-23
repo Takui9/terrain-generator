@@ -9,6 +9,7 @@ import numpy as np
 from ..mesh_parts.mesh_parts_cfg import (
     MeshPartsCfg,
     PlatformMeshPartsCfg,
+    StairMeshPartsCfg,
     HeightMapMeshPartsCfg,
     WallMeshPartsCfg,
     CapsuleMeshPartsCfg,
@@ -89,6 +90,175 @@ def create_middle_step(cfg: MeshPartsCfg, height_diff=0.2, n=11, **kwargs):
     )
     return cfgs
 
+def create_multiple_middle_steps(cfg: MeshPartsCfg, height_diff=0.2, n=11, **kwargs):
+    height_diff = height_diff + cfg.floor_thickness
+    array = np.zeros((n, n))
+    num_middle = 3
+    interval_length = 6
+    num_candidates = int(n / interval_length)
+    selected_n = np.random.choice(range(1, num_candidates+1), num_middle, replace=False) * int(n / num_candidates)
+    array[selected_n, :] = height_diff
+    cfgs = (
+        PlatformMeshPartsCfg(
+            name="start",
+            dim=cfg.dim,
+            array=np.array([[0, 0], [0, 0]]) * height_diff,
+            # rotations=(90, 180, 270),
+            flips=(),
+            weight=0.1,
+        ),
+        PlatformMeshPartsCfg(
+            name="step",
+            dim=cfg.dim,
+            array=array,
+            # rotations=(90, 180, 270),
+            flips=(),
+            weight=0.1,
+        ),
+        PlatformMeshPartsCfg(
+            name="goal",
+            dim=cfg.dim,
+            array=np.array([[0, 0], [0, 0]]) * height_diff,
+            # rotations=(90, 180, 270),
+            flips=(),
+            weight=0.1,
+        ),
+    )
+    return cfgs
+
+def create_amp_terrains(cfg: MeshPartsCfg, level=0.2, n=11, **kwargs):
+    height_diff = level / 3 + cfg.floor_thickness
+    array = np.zeros((n, n))
+    num_middle = 3
+    interval_length = 6
+    num_candidates = int(n / interval_length)
+    selected_n = np.random.choice(range(1, num_candidates+1), num_middle, replace=False) * int(n / num_candidates)
+    array[selected_n, :] = height_diff
+    cfgs = ()
+    cfgs += (
+        PlatformMeshPartsCfg(
+            name="start",
+            dim=cfg.dim,
+            array=np.array([[0, 0], [0, 0]]) * height_diff,
+            # rotations=(90, 180, 270),
+            flips=(),
+            weight=0.1,
+        ),
+    )
+    for i in range(2):
+        array = np.zeros((n, n))
+        selected_n = np.random.choice(range(1, num_candidates+1), num_middle, replace=False) * int(n / num_candidates)
+        array[selected_n, :] = height_diff
+        cfgs += (PlatformMeshPartsCfg(
+                    name=f"step0{i}",
+                    dim=cfg.dim,
+                    array=array,
+                    # rotations=(90, 180, 270),
+                    flips=(),
+                    weight=0.1,
+                ), )
+    # add stairs
+    cfgs += (StairMeshPartsCfg(
+                name="stair_up",
+                flips=(),
+                weight=0.1,
+                dim=(cfg.dim[0], cfg.dim[1], 0),
+                height_offset=0,
+                stairs=(
+                    StairMeshPartsCfg.Stair(
+                        dim=(cfg.dim[0], cfg.dim[1], 0),
+                        step_width=cfg.dim[0],
+                        n_steps=6,
+                        step_depth=0.4,
+                        total_height=level*4,
+                        height_offset=0,
+                        stair_type="standard",
+                        direction="back",
+                        add_residual_side_up=True,
+                        attach_side="center",
+                        add_rail=False,
+                    ),
+                ),
+            ), )
+    cfgs += (StairMeshPartsCfg(
+                name="stair_down",
+                flips=(),
+                weight=0.1,
+                dim=(cfg.dim[0], cfg.dim[1], 0),
+                height_offset=0,
+                stairs=(
+                    StairMeshPartsCfg.Stair(
+                        dim=(cfg.dim[0], cfg.dim[1], 0),
+                        step_width=cfg.dim[0],
+                        n_steps=6,
+                        step_depth=0.4,
+                        total_height=level*4,
+                        height_offset=0,
+                        stair_type="standard",
+                        direction="front",
+                        add_residual_side_up=True,
+                        attach_side="center",
+                        add_rail=False,
+                    ),
+                ),
+            ), )
+    cfgs += (
+        PlatformMeshPartsCfg(
+            name="step_after_stairs",
+            dim=cfg.dim,
+            array=np.array([[0, 0], [0, 0]]),
+            # rotations=(90, 180, 270),
+            flips=(),
+            weight=0.1,
+        ),
+    )
+    height_diff = 0.0
+    height_diff = height_diff + cfg.floor_thickness
+    array = np.zeros((8, 8))
+    array[:] = np.linspace(0, height_diff, 8)
+    array = array.T
+    height_std = 0.2 * level
+    array += np.random.normal(0, height_std, size=array.shape)
+    cfgs += (        
+                PlatformMeshPartsCfg(
+                    name="middle",
+                    dim=cfg.dim,
+                    array=array,
+                    # rotations=(90, 180, 270),
+                    flips=(),
+                    weight=0.1,
+                    minimal_triangles=False,
+                ),
+            )
+    z_dim_array = np.ones_like(array)
+    height_gap = -level * 0.6 + 0.9
+    floating_array = array + np.random.normal(height_gap, 
+                                              0.1, 
+                                              size=array.shape) + z_dim_array
+    cfgs += (
+                PlatformMeshPartsCfg(
+                    name="middle_floating",
+                    dim=cfg.dim,
+                    array=floating_array,
+                    z_dim_array=z_dim_array,
+                    # rotations=(90, 180, 270),
+                    flips=(),
+                    weight=0.1,
+                    minimal_triangles=False,
+                    add_floor=False,
+                    use_z_dim_array=True,
+                ),
+            )
+    
+    cfgs += (PlatformMeshPartsCfg(
+                name="goal",
+                dim=cfg.dim,
+                array=np.array([[0, 0], [0, 0]]) * height_diff,
+                # rotations=(90, 180, 270),
+                flips=(),
+                weight=0.1,
+            ),) 
+    return cfgs
 
 def create_gaps(cfg: MeshPartsCfg, gap_length=0.2, height_diff=0.0, **kwargs):
     dims = []

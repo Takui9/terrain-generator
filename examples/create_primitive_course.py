@@ -70,8 +70,62 @@ def generate_tiles(
         name, ext = os.path.splitext(mesh_name)
         floating_mesh.export(os.path.join(mesh_dir, name + "_floating" + ext))
     if visualize:
-        visualize_mesh(result_mesh, save_path=os.path.join(mesh_dir, mesh_name.replace(".obj", "") + ".png"))
+        visualize_mesh(result_mesh+floating_mesh, save_path=os.path.join(mesh_dir, mesh_name.replace(".obj", "") + ".png"))
 
+def generate_amp_tiles(
+    cfg,
+    mesh_name="result_mesh.stl",
+    mesh_dir="results/result",
+    visualize=True,
+):
+
+    dim = cfg.dim
+    tiles = create_mesh_pattern(cfg)
+
+    result_mesh = trimesh.Trimesh()
+    floating_mesh = trimesh.Trimesh()
+    y_offset = 0
+    for i, (name, tile) in enumerate(tiles.items()):
+        if name == "start":
+            mesh = tile.get_mesh().copy()
+            xy_offset = np.array([0, y_offset, 0.0])
+            mesh.apply_translation(xy_offset)
+            y_offset -= dim[1]
+            result_mesh += mesh
+        elif name == "goal":
+            mesh = tile.get_mesh().copy()
+            xy_offset = np.array([0.0, y_offset, 0.0])
+            mesh.apply_translation(xy_offset)
+            result_mesh += mesh
+        elif "floating" in name:
+            mesh = tile.get_mesh().copy()
+            xy_offset = np.array([0.0, y_offset + dim[1], 0.0])
+            mesh.apply_translation(xy_offset)
+            result_mesh += mesh
+            # y_offset -= dim[1]
+        else:
+            mesh = tile.get_mesh().copy()
+            xy_offset = np.array([0.0, y_offset, 0.0])
+            y_offset -= dim[1]
+            mesh.apply_translation(xy_offset)
+            result_mesh += mesh
+    bbox = result_mesh.bounding_box.bounds
+    # Get the center of the bounding box.
+    center = np.mean(bbox, axis=0)
+    center[2] = 0.0
+    # Get the size of the bounding box.
+    result_mesh = result_mesh.apply_translation(-center)
+    floating_mesh = floating_mesh.apply_translation(-center)
+
+    os.makedirs(mesh_dir, exist_ok=True)
+    print("saving mesh to ", mesh_name)
+    (result_mesh+floating_mesh).export(os.path.join(mesh_dir, mesh_name))
+    if floating_mesh.vertices.shape[0] > 0:
+        # get name before extension
+        name, ext = os.path.splitext(mesh_name)
+        floating_mesh.export(os.path.join(mesh_dir, name + "_floating" + ext))
+    if visualize:
+        visualize_mesh(result_mesh+floating_mesh, save_path=os.path.join(mesh_dir, mesh_name.replace(".obj", "") + ".png"))
 
 def generate_steps(dim, level, mesh_dir):
     height_diff = level * 1.0
@@ -106,6 +160,21 @@ def generate_middle_steps(dim, level, mesh_dir):
     mesh_dir = os.path.join(mesh_dir, inspect.currentframe().f_code.co_name)
     generate_tiles(cfg, mesh_name=f"mesh_{level:.1f}.obj", mesh_dir=mesh_dir)
 
+def generate_multiple_middle_steps(dim, level, mesh_dir):
+    height_diff = level * 0.5
+    n = 11
+    cfgs = create_multiple_middle_steps(MeshPartsCfg(dim=dim), height_diff=height_diff, n=33)
+    cfg = MeshPattern(dim=dim, mesh_parts=cfgs)
+    mesh_dir = os.path.join(mesh_dir, inspect.currentframe().f_code.co_name)
+    generate_tiles(cfg, mesh_name=f"mesh_{level:.1f}.stl", mesh_dir=mesh_dir)
+    
+def generate_amp_terrains(dim, level, mesh_dir):
+    # height_diff = level * 0.5
+    n = 11
+    cfgs = create_amp_terrains(MeshPartsCfg(dim=dim), level=level, n=33)
+    cfg = MeshPattern(dim=dim, mesh_parts=cfgs)
+    mesh_dir = os.path.join(mesh_dir, inspect.currentframe().f_code.co_name)
+    generate_amp_tiles(cfg, mesh_name=f"mesh_{level:.1f}.stl", mesh_dir=mesh_dir)
 
 def generate_middle_steps_wide(dim, level, mesh_dir):
     height_diff = level * 0.5
@@ -276,15 +345,16 @@ def generate_random_tunnel_slope(dim, level, mesh_dir):
 
 if __name__ == "__main__":
 
-    dim = (3.0, 3.0, 3.0)
-    level = 0.5
+    dim = (10.0, 4.0, 0.0)
     mesh_dir = "results/primitive_separated"
 
-    for level in np.arange(0.0, 1.1, 0.1):
+    for level in np.arange(0.1, 0.6, 0.1):
         # generate_steps(dim, level, mesh_dir)
         # generate_gaps(dim, level, mesh_dir)
-        generate_gaps_with_h(dim, level, mesh_dir)
+        # generate_gaps_with_h(dim, level, mesh_dir)
         # generate_middle_steps(dim, level, mesh_dir)
+        # generate_multiple_middle_steps(dim, level, mesh_dir)
+        generate_amp_terrains(dim, level, mesh_dir)
         # generate_middle_steps_wide(dim, level, mesh_dir)
         # generate_narrows(dim, level, mesh_dir)
         # generate_narrows_with_side(dim, level, mesh_dir)

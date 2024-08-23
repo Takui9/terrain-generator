@@ -41,7 +41,7 @@ def generate_perlin_terrain(
 
 if __name__ == "__main__":
     terrain = generate_perlin_terrain(horizontal_scale=0.2, vertical_scale=3.0)
-    # terrain.show()
+    terrain.show()
     tree_mesh = add_trees_on_terrain(
         terrain, num_trees=100, tree_scale_range=(0.15, 0.55), tree_deg_range=(-60, 60), tree_cylinder_sections=4
     )
@@ -54,3 +54,4 @@ if __name__ == "__main__":
     # Translate the mesh to the center of the bounding box.
     mesh = mesh.apply_translation(-center)
     mesh.export("mountain.obj")
+    mesh.show()

@@ -251,7 +251,7 @@ def create_archway_mesh(
 
 
 def create_irregular_overhang_mesh(vertices, height=0.5):
-    irregular_overhang = trimesh.creation.convex_hull(vertices)
+    irregular_overhang = trimesh.convex.convex_hull(vertices)
     irregular_overhang.apply_translation((0, 0, height))
     return irregular_overhang
 
@@ -271,12 +271,12 @@ if __name__ == "__main__":
     # table.show()
 
     # vertices = [(-0.5, 0, 0), (0.5, 0, 0), (0.2, 0.2, 0.2), (-0.2, 0.2, 0.2), (0, 0.4, 0.3)]
-    #
+    # # #
     # irregular_overhang = create_irregular_overhang_mesh(vertices, height=0.5)
     # irregular_overhang.show()
 
     archway = create_archway_mesh(array=np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [0.0, 0.0, 0.0]]))
     archway.show()
 
-    archway = create_archway_mesh(array=np.array([[0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [0.0, 0.0, 0.0]]))
-    archway.show()
+    # archway = create_archway_mesh(array=np.array([[0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [0.0, 0.0, 0.0]]))
+    # archway.show()
